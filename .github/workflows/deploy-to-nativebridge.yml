@@ -19,15 +19,12 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Accept Android SDK licenses
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-28" "build-tools;28.0.3" || true
-
       - name: Build App
         run: |
           chmod +x gradlew
           ./gradlew clean assembleDebug --stacktrace
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Upload to NativeBridge
         id: upload
