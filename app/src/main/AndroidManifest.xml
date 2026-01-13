@@ -90,10 +90,12 @@
             android:name="codepath.apps.demointroandroid.AsyncTaskPerformActivity"
             android:label="@string/title_activity_async_task_perform" >
         </activity>
+        <!-- Commented out: requires unavailable asynchttpclient library
         <activity
             android:name="codepath.apps.demointroandroid.SmartImageDownloadActivity"
             android:label="@string/title_activity_smart_image_download" >
         </activity>
+        -->
         <activity
             android:name="codepath.apps.demointroandroid.ToastFormInputsActivity"
             android:label="@string/title_activity_toast_form_inputs" >

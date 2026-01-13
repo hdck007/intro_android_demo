@@ -46,7 +46,7 @@ public class ExerciseActivityMapper {
 	  // Chapter 6: Networking
 	  exerciseClassMap.put("chap6ex1", BasicImageDownloadActivity.class); // Basic Image Download
 	  exerciseClassMap.put("chap6ex2", AsyncTaskPerformActivity.class); // AsyncTask
-	  exerciseClassMap.put("chap6ex3", SmartImageDownloadActivity.class); // Smart Image Download
+	  // exerciseClassMap.put("chap6ex3", SmartImageDownloadActivity.class); // Smart Image Download - requires unavailable library
 	  // Chapter 7: Advanced Views
 	  exerciseClassMap.put("chap7ex1", ToastFormInputsActivity.class); // Toast Inputs
 	  exerciseClassMap.put("chap7ex2", SpinnerWithToastActivity.class); // Spinner Toast
