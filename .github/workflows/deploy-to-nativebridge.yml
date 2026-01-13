@@ -19,10 +19,18 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Clean SDK cache to fix corrupted metadata
+        run: |
+          rm -rf $HOME/.android/cache/*
+          rm -rf $ANDROID_SDK_ROOT/.temp/*
+
       - name: Build App
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew clean assembleDebug --stacktrace
 
       - name: Upload to NativeBridge
         id: upload
