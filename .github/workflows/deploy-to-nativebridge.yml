@@ -43,22 +43,44 @@ jobs:
 
       - name: Upload to NativeBridge
         id: upload
+        env:
+          NB_API_KEY: ${{ secrets.NATIVEBRIDGE_API_KEY }}
+          NB_ALLOWED_USERS: ${{ secrets.NATIVEBRIDGE_ALLOWED_USERS }}
+          NB_ACCESS_TYPE: ${{ secrets.NATIVEBRIDGE_ACCESS_TYPE }}
         run: |
-          response=$(curl -X POST https://api.nativebridge.dev/v1/apps/upload \
-            -H "Authorization: Bearer ${{ secrets.NATIVEBRIDGE_API_KEY }}" \
-            -F "file=@app/build/outputs/apk/debug/app-debug.apk" \
-            -F "platform=android" \
-            -F "buildMessage=${{ github.event.head_commit.message }}")
+          if [ -z "$NB_API_KEY" ]; then
+            echo "❌ Missing NATIVEBRIDGE_API_KEY secret"
+            exit 1
+          fi
+
+          access_type=${NB_ACCESS_TYPE:-public}
+
+          curl_cmd=(
+            curl --location https://api.nativebridge.io/v1/application
+              -H "accept: application/json"
+              -H "X-Api-Key: $NB_API_KEY"
+              -F "file=@app/build/outputs/apk/debug/app-debug.apk"
+              -F "accessType=$access_type"
+          )
+
+          if [ -n "$NB_ALLOWED_USERS" ]; then
+            curl_cmd+=( -F "allowedUsers=$NB_ALLOWED_USERS" )
+          fi
+
+          echo "📤 Uploading APK to NativeBridge..."
+          response=$("${curl_cmd[@]}")
 
           echo "response=$response" >> $GITHUB_OUTPUT
-          magic_link=$(echo $response | jq -r '.magicLink // empty')
-          if [ -z "$magic_link" ]; then
+          magic_link=$(echo "$response" | jq -r '.data.magicLink // empty' 2>/dev/null || echo "")
+
+          if [ -n "$magic_link" ] && [ "$magic_link" != "null" ]; then
+            echo "magic_link=$magic_link" >> $GITHUB_OUTPUT
+            echo "✅ Upload successful: $magic_link"
+          else
             echo "❌ Failed to get magic link from response"
             echo "Response: $response"
             exit 1
           fi
-          echo "magic_link=$magic_link" >> $GITHUB_OUTPUT
-          echo "✅ Upload successful: $magic_link"
 
       - name: Comment PR with Magic Link
         if: github.event_name == 'pull_request' && steps.upload.outcome == 'success'
@@ -72,10 +94,10 @@ jobs:
               body: `🚀 **App Preview Ready!**\n\nTest this build: ${{ steps.upload.outputs.magic_link }}\n\n_Powered by NativeBridge_`
             })
 
-      - name: Upload APK as artifact
+      - name: Upload APK as artifact (backup)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
